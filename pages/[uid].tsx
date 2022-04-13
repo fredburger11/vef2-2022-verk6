@@ -14,41 +14,23 @@ type Pages = {
     uid?: string;
   }
   title?: PrismicRichText;
-  home?: HTMLHyperlinkElementUtils;
+  //home?: HTMLHyperlinkElementUtils;
   list?: PrismicRichText;
 }
 
 type Props = {
-  allPages?: Array<{
-    node?: Pages | undefined;
-  }>;
+  page: Pages | undefined;
+ 
 }
 
-function Pages({ pages }: { pages: Array<{
-  node?: Pages | undefined;
-}> }) {
-  return (
-    <ul>
-      {pages?.map((item, i) => {
-        const title = asText(item.node?.title);
-        return (
-          <li key={i}>
-            <Link href={`/${item.node?._meta.uid}`}>
-              {title}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  )
-}
 
-export default function Home({ allPages }: Props) {
+
+export default function Home({ page }: Props) {
   //console.log(pages);
   return (
     <section>
-      <h1>h1 síður</h1>
-      <Pages pages={allPages} />
+      <h1>TESTING</h1>
+      <h1>{asText(page.title)}</h1>
     </section>
   );
 }
@@ -68,7 +50,7 @@ fragment page on Page {
 }
 
 query($uid: String = "") {
-  page(uid: $uid, lang: "is") {
+  page(uid: $uid, lang: "en") {
     ...page
   }
   allPages(sortBy: title_ASC, first: 5) {
@@ -98,15 +80,23 @@ type PrismicResponse = {
   }
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ params }) {
 
-
-  const result = await fetchFromPrismic<PrismicResponse>(query);
+  const { uid } = params.uid;
+  const result = await fetchFromPrismic<PrismicResponse>(query, { uid });
+  
   console.log('result :>> ', result);
-  const allPages = result.allPages?.edges ?? [];
-  console.log('allNews :>> ', allPages);
+  //const allPages = result.allPages?.edges ?? [];
+  const page = result.allPages?.edges ?? null;
+  
+  if(!page) {
+      return {
+          notFound: true,
+          props: {},
+      };
+  }
 
   return {
-    props: { allPages }, // will be passed to the page component as props
+    props: { page }, // will be passed to the page component as props
   }
 }
