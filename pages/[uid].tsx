@@ -1,70 +1,129 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { fetchFromPrismic } from '../api/prismic';
+import { fetchFromPrismic } from '../api/prismic'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
-import { PrismicRichText } from '@prismicio/react'
-import { asText } from '@prismicio/helpers'
+import { PrismicImageProps, PrismicRichText, PrismicLink, PrismicLinkProps} from '@prismicio/react'
+import { asText, asLink } from '@prismicio/helpers'
 
-type PrismicRichText = any;
 
-type Pages = {
+type PrismicRichTextType = any;
+
+type Projects = {
   _meta?: {
     uid?: string;
   }
-  title?: PrismicRichText;
-  //home?: HTMLHyperlinkElementUtils;
-  list?: PrismicRichText;
+  title?: PrismicRichTextType;
+  link?: PrismicRichTextType;
+  detail?: PrismicRichTextType;
+  image?: {
+    url?: string;
+    alt?: PrismicRichTextType;
+  }
+  linktitle?: PrismicRichTextType;
+  links?: PrismicRichTextType;
 }
 
 type Props = {
-  page: Pages | undefined;
- 
+  project: Projects | undefined;
 }
 
+function Links({ project }: { project: Projects | undefined; }) {
+  return (
+    <ul>
+      {project?.links?.map((item, i) => {
+        const title = asText(item);
+        const link = asLink(item.spans?.data)
+        return (
+          <li key={i}>
+            <Link href={`/${link}`}>
+              {title}
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+//<p>{asText(project.links)}</p>
 
-
-export default function Home({ page }: Props) {
-  //console.log(pages);
+export default function Home({ project }: Props) {
+  //console.log('allHoms : >> ', project);
+  //console.log('alt :>> ', project?.image?.alt);
   return (
     <section>
-      <h1>TESTING</h1>
-      <h1>{asText(page.title)}</h1>
+      <h1>{asText(project?.title)}</h1>
+      <p>{asText(project?.detail)}</p>
+      
+      <div>
+        <img src={project?.image?.url} width={400} height={400} alt={project?.image?.alt} />
+        <p>{project?.image?.alt}</p>
+      </div>
+      <h3>{asText(project?.linktitle)}</h3>
+      <div>
+        <Links project={project}></Links>
+      </div>
+      <div>
+        <Link href="/">
+          <a>Aftur á upphafssíðu</a>
+        </Link>
+      </div>
     </section>
   );
 }
 
-const query = `
-fragment page on Page {
-  _meta {uid}
-  
-  title
 
-  list{
-    picture
-    mylink{_linkType}
-    accordion
-    content
+
+const query = `
+fragment projects on Projects {
+  _meta{
+    uid
   }
+  title
+  link{
+    _linkType
+    __typename
+  }
+  detail
+  image
+  linktitle
+  links
 }
 
 query($uid: String = "") {
-  page(uid: $uid, lang: "en") {
-    ...page
-  }
-  allPages(sortBy: title_ASC, first: 5) {
+  projects(uid: $uid, lang: "is") {
+    ...projects
+  }  
+  allProjectss {
     totalCount
     pageInfo{
-      hasNextPage
-      hasPreviousPage
       startCursor
       endCursor
     }
     edges {
+      node {
+        ...projects
+      }
+    }
+  }
+  allHoms{
+    edges{
       cursor
       node{
-        ...page
+        title
+        intro
+        links{
+          link1{
+            _linkType
+            __typename
+          }
+          link2{
+            _linkType
+            __typename
+          }
+        }
+        
       }
     }
   }
@@ -72,31 +131,33 @@ query($uid: String = "") {
 `;
 
 type PrismicResponse = {
-  pages?: Pages;
-  allPages?: {
+  projects?: Projects;
+  allProjectss?: {
     edges?: Array<{
-      node?: Pages;
+      node?: Projects;
     }>;
   }
 }
 
-export async function getServerSideProps({ params }) {
+export async function getServerSideProps({ params }: any) {
 
-  const { uid } = params.uid;
+  const { uid } = params;
+
   const result = await fetchFromPrismic<PrismicResponse>(query, { uid });
-  
-  console.log('result :>> ', result);
-  //const allPages = result.allPages?.edges ?? [];
-  const page = result.allPages?.edges ?? null;
-  
-  if(!page) {
-      return {
-          notFound: true,
-          props: {},
-      };
-  }
 
+  //console.log('result :>> ', result);
+  
+  const project = result.projects ?? null;
+
+  //console.log('project :>> ', project);
+  
+  if(!project) {
+    return {
+      notFound: true,
+      props: {},
+    };
+  }
   return {
-    props: { page }, // will be passed to the page component as props
+    props: { project }, // will be passed to the page component as props
   }
 }
