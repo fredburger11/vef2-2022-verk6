@@ -44,7 +44,7 @@ export interface Image {
     dimensions?: Dimensions;
     alt?:        string;
     copyright?:  null;
-    url?:        string;
+    url?:        PrismicRichTextType;
 }
 
 export interface Dimensions {
