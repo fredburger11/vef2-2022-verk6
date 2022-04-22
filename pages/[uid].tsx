@@ -1,43 +1,33 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
-import { fetchFromPrismic } from '../api/prismic'
+import Image from 'next/image';
+import { fetchFromPrismic } from '../api/prismic';
 import styles from '../styles/Home.module.css'
-import Link from 'next/link'
+import Link from 'next/link';
 import { PrismicImageProps, PrismicRichText, PrismicLink, PrismicLinkProps} from '@prismicio/react'
-import { asText, asLink } from '@prismicio/helpers'
+import { asText, asLink } from '@prismicio/helpers';
+import { Node, Data } from '../types';
+
+type Projects = Node;
 
 
-type PrismicRichTextType = any;
-
-type Projects = {
-  _meta?: {
-    uid?: string;
-  }
-  title?: PrismicRichTextType;
-  link?: PrismicRichTextType;
-  detail?: PrismicRichTextType;
-  image?: {
-    url?: string;
-    alt?: PrismicRichTextType;
-  }
-  linktitle?: PrismicRichTextType;
-  links?: PrismicRichTextType;
-}
 
 type Props = {
-  project: Projects | undefined;
+  project: Projects;
 }
 
-function Links({ project }: { project: Projects | undefined; }) {
+function Links({ project }: Props) {
+  
   return (
     <ul>
-      {project?.links?.map((item, i) => {
-        const title = asText(item);
-        const link = asLink(item.spans?.data)
+      {project.links?.map((item, i) => {
+        //console.log(item?.spans[);
+        
+        const url = (item?.spans);
+        const title = (item?.text);
         return (
           <li key={i}>
-            <Link href={`/${link}`}>
+            <Link href={`${url}`}>
               {title}
             </Link>
           </li>
@@ -46,7 +36,18 @@ function Links({ project }: { project: Projects | undefined; }) {
     </ul>
   )
 }
-//<p>{asText(project.links)}</p>
+/*
+function Links({ project }: { project: Projects | undefined; }) {
+  return (
+    <div>
+      
+        {JSON.stringify(project)}
+    </div>
+  )
+}*/
+
+//<img src={project?.image?.url} width={400} height={400} alt={project?.image?.alt} />
+//<p>{project?.image?.alt}</p>
 
 export default function Home({ project }: Props) {
   //console.log('allHoms : >> ', project);
@@ -57,8 +58,14 @@ export default function Home({ project }: Props) {
       <p>{asText(project?.detail)}</p>
       
       <div>
-        <img src={project?.image?.url} width={400} height={400} alt={project?.image?.alt} />
-        <p>{project?.image?.alt}</p>
+        <Image 
+          
+          src={project?.image?.url}
+          alt={project?.image?.alt}
+          width="400"
+          height="200"
+
+        />
       </div>
       <h3>{asText(project?.linktitle)}</h3>
       <div>

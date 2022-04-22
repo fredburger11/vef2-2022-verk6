@@ -1,4 +1,4 @@
-import type { GetServerSideProps, NextPage } from 'next'
+import type { GetServerSideProps, NextPage, GetStaticProps } from 'next';
 import Head from 'next/head'
 import Image from 'next/image'
 import { fetchFromPrismic } from '../api/prismic'
@@ -6,13 +6,28 @@ import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import { PrismicRichText } from '@prismicio/react'
 import { asText } from '@prismicio/helpers'
+import { AllProjectss } from '../types';
 
 type PrismicRichTextType = any;
 
-type Homs = {
+
+
+export interface AllHoms {
+  cursor?: string;
+  node?: Node;
+  
+}
+
+export interface Node {
   title?: PrismicRichTextType;
   intro?: PrismicRichTextType;
   links?: PrismicRichTextType;
+}
+
+export interface Intro {
+  type?:  string;
+  text?:  string;
+  spans?: PrismicRichTextType[];
 }
 
 type Projects = {
@@ -22,22 +37,36 @@ type Projects = {
   title?: PrismicRichTextType;
   link?: PrismicRichTextType;
   detail?: PrismicRichTextType;
-  
 }
 
-type Props = {
-  allProjectss?: Array<{
-    node?: Projects | undefined;
-  }>;
+type homepage = {
+  allHoms?: AllHoms[];
+  allProjectss?: AllProjectss;
+}
 
-  allHoms?: Array<{
-    node?: Homs | undefined;
-  }>;
+function Homepage({ allHoms }: homepage) {
+  //console.log(JSON.stringify(allHoms))
+  return (
+    <ul>
+      {allHoms?.map((item, i) => {
+        const title = asText(item.node?.title);
+        const intro = asText(item.node?.intro);
+        return (
+          <div key={i}>
+            <h1>{title}</h1>
+            <h4>{intro}</h4>
+          </div> 
+          
+        )
+      })}
+    </ul>
+  )
 }
 
 function Projects({ project }: { project: Array<{
   node?: Projects | undefined;
 }> }) {
+  console.log(JSON.stringify(project));
   return (
     <ul>
       {project.map((item, i) => {
@@ -53,20 +82,19 @@ function Projects({ project }: { project: Array<{
   )
 }
 
-export default function Home({ allProjectss, allHoms }: Props) {
-  console.log('allHoms : >> ', allHoms);
+export default function Home({ allHoms, allProjectss }: homepage) {
+  //console.log('allHoms : >> ', allHoms);
   //console.log('allProjects :>> ', allProjectss);
-  //console.log('homes :>> ', allHoms.node[0].title);
+  
   return (
     <section>
-      <h1>Forsíða</h1>
-      <p>Verkefni sem ég hef gert.</p>
-      <Projects project={allProjectss} />
+      
+        <Homepage allHoms={allHoms}></Homepage>
+      
+      <Projects project={allProjectss}></Projects>
     </section>
-  );
+  )
 }
-
-
 
 const query = `
 fragment projects on Projects {
@@ -102,7 +130,7 @@ query($uid: String = "") {
   }
   allHoms{
     edges{
-      cursor
+      
       node{
         title
         intro
@@ -132,7 +160,7 @@ type PrismicResponse = {
   }
   allHoms?: {
     edges?: Array<{
-      node?: Homs;
+      node?: Node;
     }>;
   }  
 }
@@ -142,10 +170,10 @@ export async function getServerSideProps() {
   const result = await fetchFromPrismic<PrismicResponse>(query);
   //console.log('result :>> ', result);
   const allProjectss = result.allProjectss?.edges;
-  const allHoms = result.allHoms?.edges;
+  const  allHoms = result.allHoms?.edges;
   //console.log('allHoms : >> ', allHoms);
   //console.log('allHoms :>> ', allProjectss);
   return {
-    props: { allProjectss, allHoms }, // will be passed to the page component as props
+    props: { allHoms, allProjectss }, // will be passed to the page component as props
   }
 }
