@@ -1,6 +1,10 @@
 type PrismicRichTextType = any;
 
 export interface AllProjectss {
+    allProjectss?: AllProjectss[];
+}
+
+export interface AllProjectss {
     node?: Node;
 }
 

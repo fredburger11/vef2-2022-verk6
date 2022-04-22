@@ -4,16 +4,16 @@ import { asText } from '@prismicio/helpers';
 import { AllProjectss, Node } from '../types/projecttypes';
 import { AllHoms } from '../types/homeptypes';
 
+
 type Projects = Node;
 
-
-type homepage = {
+interface homepage {
   allHoms?: AllHoms[];
   allProjectss?: AllProjectss[];
 }
 
 function Homepage({ allHoms }: homepage) {
-  //console.log(JSON.stringify(allHoms))
+  
   return (
     <ul>
       {allHoms?.map((item, i) => {
@@ -31,12 +31,10 @@ function Homepage({ allHoms }: homepage) {
   )
 }
 
-function Projects({ allProjectss }: { allProjectss: Array<{
-  node?: Projects;
-}> }) {
+function Projects({ allProjectss }: homepage) {
   return (
     <ul>
-      {allProjectss.map((item, i) => {
+      {allProjectss?.map((item, i) => {
         const title = asText(item.node?.title);
         return (
           <li key={i}>
@@ -130,8 +128,8 @@ type PrismicResponse = {
 export async function getServerSideProps() {
 
   const result = await fetchFromPrismic<PrismicResponse>(query);
-  const allProjectss = result.allProjectss?.edges;
-  const  allHoms = result.allHoms?.edges;
+  const allProjectss = result.allProjectss?.edges ?? [];
+  const  allHoms = result.allHoms?.edges ?? [];
   
   return {
     props: { allHoms, allProjectss }, // will be passed to the page component as props
