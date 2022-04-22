@@ -1,12 +1,8 @@
-import type { GetServerSideProps, NextPage } from 'next'
-import Head from 'next/head'
 import Image from 'next/image';
 import { fetchFromPrismic } from '../api/prismic';
-import styles from '../styles/Home.module.css'
 import Link from 'next/link';
-import { PrismicImageProps, PrismicRichText, PrismicLink, PrismicLinkProps} from '@prismicio/react'
-import { asText, asLink } from '@prismicio/helpers';
-import { Node, Data } from '../types';
+import { asText } from '@prismicio/helpers';
+import { Node } from '../types/projecttypes';
 
 type Projects = Node;
 
