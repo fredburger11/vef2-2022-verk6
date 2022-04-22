@@ -1,47 +1,15 @@
-import type { GetServerSideProps, NextPage, GetStaticProps } from 'next';
-import Head from 'next/head'
-import Image from 'next/image'
-import { fetchFromPrismic } from '../api/prismic'
-import styles from '../styles/Home.module.css'
-import Link from 'next/link'
-import { PrismicRichText } from '@prismicio/react'
-import { asText } from '@prismicio/helpers'
-import { AllProjectss } from '../types';
+import { fetchFromPrismic } from '../api/prismic';
+import Link from 'next/link';
+import { asText } from '@prismicio/helpers';
+import { AllProjectss, Projects } from '../types/projecttypes';
+import { AllHoms } from '../types/homeptypes';
 
-type PrismicRichTextType = any;
+type Project = Projects;
 
-
-
-export interface AllHoms {
-  cursor?: string;
-  node?: Node;
-  
-}
-
-export interface Node {
-  title?: PrismicRichTextType;
-  intro?: PrismicRichTextType;
-  links?: PrismicRichTextType;
-}
-
-export interface Intro {
-  type?:  string;
-  text?:  string;
-  spans?: PrismicRichTextType[];
-}
-
-type Projects = {
-  _meta?: {
-    uid?: string;
-  }
-  title?: PrismicRichTextType;
-  link?: PrismicRichTextType;
-  detail?: PrismicRichTextType;
-}
 
 type homepage = {
   allHoms?: AllHoms[];
-  allProjectss?: AllProjectss;
+  allProjectss?: AllProjectss | undefined;
 }
 
 function Homepage({ allHoms }: homepage) {
@@ -66,7 +34,6 @@ function Homepage({ allHoms }: homepage) {
 function Projects({ project }: { project: Array<{
   node?: Projects | undefined;
 }> }) {
-  console.log(JSON.stringify(project));
   return (
     <ul>
       {project.map((item, i) => {
@@ -82,15 +49,10 @@ function Projects({ project }: { project: Array<{
   )
 }
 
-export default function Home({ allHoms, allProjectss }: homepage) {
-  //console.log('allHoms : >> ', allHoms);
-  //console.log('allProjects :>> ', allProjectss);
-  
+export default function Home({ allHoms, allProjectss }: homepage) { 
   return (
-    <section>
-      
-        <Homepage allHoms={allHoms}></Homepage>
-      
+    <section> 
+      <Homepage allHoms={allHoms}></Homepage>
       <Projects project={allProjectss}></Projects>
     </section>
   )
@@ -152,10 +114,10 @@ query($uid: String = "") {
 `;
 
 type PrismicResponse = {
-  projects?: Projects;
+  projects?: Project;
   allProjectss?: {
     edges?: Array<{
-      node?: Projects;
+      node?: Project;
     }>;
   }
   allHoms?: {
@@ -168,11 +130,9 @@ type PrismicResponse = {
 export async function getServerSideProps() {
 
   const result = await fetchFromPrismic<PrismicResponse>(query);
-  //console.log('result :>> ', result);
   const allProjectss = result.allProjectss?.edges;
   const  allHoms = result.allHoms?.edges;
-  //console.log('allHoms : >> ', allHoms);
-  //console.log('allHoms :>> ', allProjectss);
+  
   return {
     props: { allHoms, allProjectss }, // will be passed to the page component as props
   }

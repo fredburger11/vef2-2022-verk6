@@ -10,8 +10,6 @@ import { Node, Data } from '../types';
 
 type Projects = Node;
 
-
-
 type Props = {
   project: Projects;
 }
@@ -20,9 +18,7 @@ function Links({ project }: Props) {
   
   return (
     <ul>
-      {project.links?.map((item, i) => {
-        //console.log(item?.spans[);
-        
+      {project.links?.map((item, i) => {        
         const url = (item?.spans);
         const title = (item?.text);
         return (
@@ -36,22 +32,9 @@ function Links({ project }: Props) {
     </ul>
   )
 }
-/*
-function Links({ project }: { project: Projects | undefined; }) {
-  return (
-    <div>
-      
-        {JSON.stringify(project)}
-    </div>
-  )
-}*/
-
-//<img src={project?.image?.url} width={400} height={400} alt={project?.image?.alt} />
-//<p>{project?.image?.alt}</p>
 
 export default function Home({ project }: Props) {
-  //console.log('allHoms : >> ', project);
-  //console.log('alt :>> ', project?.image?.alt);
+  
   return (
     <section>
       <h1>{asText(project?.title)}</h1>
