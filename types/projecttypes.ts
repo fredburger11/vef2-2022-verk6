@@ -4,10 +4,6 @@ export interface AllProjectss {
     node?: Node;
 }
 
-export interface Projects {
-    projects?: Projects[];
-}
-
 export interface Node {
     _meta?:     Meta;
     title?:     PrismicRichTextType;

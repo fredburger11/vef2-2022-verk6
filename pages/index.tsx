@@ -1,15 +1,15 @@
 import { fetchFromPrismic } from '../api/prismic';
 import Link from 'next/link';
 import { asText } from '@prismicio/helpers';
-import { AllProjectss, Projects } from '../types/projecttypes';
+import { AllProjectss, Node } from '../types/projecttypes';
 import { AllHoms } from '../types/homeptypes';
 
-type Project = Projects;
+type Projects = Node;
 
 
 type homepage = {
   allHoms?: AllHoms[];
-  allProjectss?: AllProjectss | undefined;
+  allProjectss?: AllProjectss[];
 }
 
 function Homepage({ allHoms }: homepage) {
@@ -31,12 +31,12 @@ function Homepage({ allHoms }: homepage) {
   )
 }
 
-function Projects({ project }: { project: Array<{
-  node?: Projects | undefined;
+function Projects({ allProjectss }: { allProjectss: Array<{
+  node?: Projects;
 }> }) {
   return (
     <ul>
-      {project.map((item, i) => {
+      {allProjectss.map((item, i) => {
         const title = asText(item.node?.title);
         return (
           <li key={i}>
@@ -53,7 +53,7 @@ export default function Home({ allHoms, allProjectss }: homepage) {
   return (
     <section> 
       <Homepage allHoms={allHoms}></Homepage>
-      <Projects project={allProjectss}></Projects>
+      <Projects allProjectss={allProjectss}></Projects>
     </section>
   )
 }
@@ -114,10 +114,10 @@ query($uid: String = "") {
 `;
 
 type PrismicResponse = {
-  projects?: Project;
+  projects?: Projects;
   allProjectss?: {
     edges?: Array<{
-      node?: Project;
+      node?: Projects;
     }>;
   }
   allHoms?: {
